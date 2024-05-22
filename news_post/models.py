@@ -8,6 +8,7 @@ from author.models import NewsPostAuthor
 class NewsPost(models.Model):
     title = models.CharField(max_length=200)
     content = models.TextField(null=True)
+    image = models.ImageField(upload_to='news_post_image', null=True, blank=True)
     author = models.ForeignKey(NewsPostAuthor, on_delete=models.CASCADE, null=True, blank=True)
     created_date = models.DateTimeField(auto_now_add=True)
     updated_date = models.DateTimeField(auto_now=True)
