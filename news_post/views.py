@@ -131,3 +131,23 @@ def list_news_post(request):
         return JsonResponse({'news_post_list': news_post_list}, status=201)
 
     return JsonResponse({'error': 'Method not allowed'}, status=405)
+
+
+@csrf_exempt
+def view_news_post(request):
+    if request.method == 'GET':
+        data = request.GET
+        post_id = int(data.get('post_id'))
+        i = NewsPost.objects.get(id=post_id)
+        news_post_dict = {}
+        news_post_dict['post_id'] = i.id
+        news_post_dict['post_title'] = i.title
+        news_post_dict['post_content'] = i.content
+        news_post_dict['image'] = request.build_absolute_uri(i.image.url) if i.image else ''
+        news_post_dict['post_categories'] = i.categories.name if i.categories.name else ''
+        news_post_dict['post_author'] = i.author.user.name if i.author.user.name else ''
+        news_post_dict['post_created_date'] = i.created_date
+
+        return JsonResponse({'news_post_dict': news_post_dict}, status=201)
+
+    return JsonResponse({'error': 'Method not allowed'}, status=405)
