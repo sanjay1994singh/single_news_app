@@ -13,11 +13,12 @@ from news_post.models import NewsPost
 def create_news_post(request):
     if request.method == 'POST':
         data = request.POST
+        data1 = request.FILES
         title = data.get('title')
         content = data.get('content')
         author_id = int(data.get('author'))
         category_id = int(data.get('categories'))
-
+        image = data1.get('image')
         if not title:
             return JsonResponse({'error': 'Title is required'}, status=400)
 
@@ -48,7 +49,9 @@ def create_news_post(request):
                                             author_id=author_id,
                                             categories_id=category_id
                                             )
-        news_post.save()
+        if news_post:
+            news_post.image = image
+            news_post.save()
         return JsonResponse({'message': 'News post created successfully'}, status=201)
 
     return JsonResponse({'error': 'Method not allowed'}, status=405)
@@ -58,11 +61,13 @@ def create_news_post(request):
 def update_news_post(request):
     if request.method == 'POST':
         data = request.POST
+        data1 = request.FILES
         post_id = int(data.get('post_id'))
         title = data.get('title')
         content = data.get('content')
         author_id = int(data.get('author'))
         category_id = int(data.get('categories'))
+        image = data1.get('image')
 
         if not title:
             return JsonResponse({'error': 'Title is required'}, status=400)
@@ -91,11 +96,16 @@ def update_news_post(request):
         except Category.DoesNotExist:
             return JsonResponse({'error': 'Category does not exist'}, status=404)
 
-        NewsPost.objects.filter(id=post_id).update(title=title,
-                                                   content=content,
-                                                   author_id=author_id,
-                                                   categories_id=category_id
-                                                   )
+        news_post = NewsPost.objects.filter(id=post_id).update(title=title,
+                                                               content=content,
+                                                               author_id=author_id,
+                                                               categories_id=category_id
+                                                               )
+
+        if news_post:
+            if image:
+                news_post.image = image
+                news_post.save()
         return JsonResponse({'message': 'News post updated successfully'}, status=201)
 
     return JsonResponse({'error': 'Method not allowed'}, status=405)
@@ -112,6 +122,7 @@ def list_news_post(request):
                 news_post_dict['post_id'] = i.id
                 news_post_dict['post_title'] = i.title
                 news_post_dict['post_content'] = i.content
+                news_post_dict['image'] = request.build_absolute_uri(i.image.url) if i.image else ''
                 news_post_dict['post_categories'] = i.categories.name if i.categories.name else ''
                 news_post_dict['post_author'] = i.author.user.name if i.author.user.name else ''
                 news_post_dict['post_created_date'] = i.created_date
