@@ -42,6 +42,8 @@ INSTALLED_APPS = [
     'author',
     'news_post',
     'homepage',
+    'banner',
+    'advertisement',
 ]
 
 MIDDLEWARE = [
