@@ -8,6 +8,8 @@ from category.models import Category
 
 from news_post.models import NewsPost
 
+from banner.models import Banner, BannerImage
+
 
 @csrf_exempt
 def create_news_post(request):
@@ -128,7 +130,25 @@ def list_news_post(request):
                 news_post_dict['post_created_date'] = i.created_date
                 news_post_list.append(news_post_dict)
 
-        return JsonResponse({'news_post_list': news_post_list}, status=201)
+        banner = Banner.objects.all()
+        banner_list = []
+        if banner:
+            for i in banner:
+                banner_dict = {}
+                banner_dict['id'] = i.id
+                banner_dict['banner_code'] = i.banner_code
+                banner_dict['banner_title'] = i.banner_title
+                banner_image = BannerImage.objects.filter(banner__banner_code=i.banner_code).values('img')
+                if banner_image:
+                    banner_dict['banner_image'] = list(banner_image)
+                else:
+                    banner_dict['banner_image'] = []
+                banner_list.append(banner_dict)
+        context = {
+            'news_post_list': news_post_list,
+            'banner_list': banner_list,
+        }
+        return JsonResponse(context, status=201)
 
     return JsonResponse({'error': 'Method not allowed'}, status=405)
 
